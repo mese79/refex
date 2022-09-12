@@ -1,5 +1,5 @@
-
 import time
+import random
 import json
 import re
 from pprint import pprint
@@ -44,7 +44,8 @@ def extract_refs(pdf_path: str):
     text = textract.process(pdf_path, encoding='utf-8').decode()
     ref_index = text.find(REF_TITLE)
     if ref_index > -1:
-        text = clean_refs(text[ref_index:])
+        text = text[ref_index + len(REF_TITLE):]  # omit the 'Reference' word
+        text = clean_text(text)
         print(f'\n\n{text[:500]}')
         cit_name, pattern = find_pattern(text[:500])
         print(f'\n{cit_name}\n{pattern}')
@@ -52,28 +53,28 @@ def extract_refs(pdf_path: str):
         if pattern is None:
             pass
         else:
-            titles = get_ref_titles(text, pattern)
-            pprint(titles)
+            refs = get_refs_from_text(text, pattern)
+            pprint(refs)
             print()
 
             # pg = ProxyGenerator()
             # print(pg.FreeProxies())
             # scholarly.use_proxy(pg)
-            pubs = query_scholars(titles)
+            pubs = query_scholars(refs)
             data = {
                 'title': pdf_info.title,
                 'author': pdf_info.author,
-                'refs': pubs
+                'refs': refs[:3],
+                'pubs': pubs[:3]
             }
             print(data)
             save_html(data, HTML_TEMPLATE_FILE, 'output.html')
 
 
-def clean_refs(refs: str) -> str:
-    refs = refs[len(REF_TITLE):]  # omit the 'Reference' word
-    refs = refs.replace('“', '"').replace('”', '"')
-    refs = refs.replace('\n', ' ')
-    return refs
+def clean_text(text: str) -> str:
+    text = text.replace('“', '"').replace('”', '"')
+    text = text.replace('\n', ' ').strip()
+    return text
 
 
 def find_pattern(sample: str) -> Tuple[Optional[str], Optional[str]]:
@@ -89,18 +90,24 @@ def find_pattern(sample: str) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 
-def get_ref_titles(text: str, pattern: str) -> List:
-    titles = []
+def get_refs_from_text(text: str, pattern: str) -> List[dict]:
+    refs = []
     for match in re.finditer(pattern, text):
-        titles.append(match.group('title'))
+        d = match.groupdict()
+        # add the matched text too
+        d.update({
+            'text': clean_text(text[match.start(): match.end()])
+        })
+        refs.append(d)
 
-    return titles
+    return refs
 
 
-def query_scholars(titles: List[str]):
+def query_scholars(refs: List[dict]):
     pubs = []
-    for title in titles[:3]:
-        time.sleep(10)
+    for ref in refs[:3]:
+        time.sleep(5 + random.randint(0, 7))
+        title = ref['title']
         print(f'querying "{title}" ...')
         query = scholarly.search_pubs(title)
         pub = next(query)  # get the first result

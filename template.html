@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Extracted References</title>
+    <style>
+		body {
+			font-family: serif;
+		}
+		.main {
+            width: 100%;
+			margin: 15px;
+		}
+		.paper {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: stretch;
+            margin-bottom: 35px;
+		}
+        .paper .row {
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: stretch;
+            padding: 7px 0 7px 0;
+        }
+        .paper .col {
+            display: inline-block;
+            /* position: relative; */
+        }
+        .col1 {
+            width: 8%;
+            font-weight: 700;
+        }
+        .col2 {
+            width: 85%;
+            font-size: 18px;
+        }
+        .refs .ref {
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+
+	</style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="paper">
+            <div class="row">
+                <div class="col col1">Title:</div>
+                <div class="col col2">{{ data.title }}</div>
+            </div>
+            <div class="row">
+                <div class="col col1">Author(s):</div>
+                <div class="col col2">{{ data.author }}</div>
+            </div>
+        </div>
+
+        <div class="refs">
+            <h3>References:</h3>
+            {% for ref in data.refs %}
+            <div class="ref">
+                <div class="cite">{{ loop.index }}. {{ ref.text }}</div>
+                <div class="link">
+                    <a href="{{ data.pubs[loop.index0]['pub_url']}} " target="_blank">Link to Paper</a>
+                </div>
+                <div class="cite-num">
+                    Number of Citations: <span>{{ data.pubs[loop.index0]['num_citations'] }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+
+</html>
