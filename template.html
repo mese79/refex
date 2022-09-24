@@ -7,6 +7,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Extracted References</title>
     <style>
+        html {
+            background: #eeeeee;
+        }
 		body {
 			font-family: serif;
 		}
@@ -51,7 +54,19 @@
             margin: 5px 0 0 0;
             padding: 0 0 0 7px;
             margin: 5px 0 0 0;
-        	/* border: 1px solid violet; */
+        }
+        .abstract .text {
+            display: none;
+            width: 60%;
+            font-size: 90%;
+            text-align: justify;
+            text-justify: inter-word;
+            margin: 0 0 0 10px;
+            padding: 5px 12px;
+            border: 1px solid violet;
+        }
+        .display {
+            display: block !important;
         }
 
 	</style>
@@ -62,11 +77,13 @@
         function toggleAbstract(index) {
             absToggle = !absToggle;
             const span = document.getElementById("absToggle" + index);
-            console.log(absToggle, span);
+            const divAbs = document.getElementById("abstract" + index);
             if (absToggle === true) {
                 span.innerHTML = "(hide)";
+                divAbs.classList.add("display");
             } else {
                 span.innerHTML = "(show)";
+                divAbs.classList.remove("display");
             }
         }
     </script>
@@ -92,15 +109,16 @@
                 <div class="cite">{{ loop.index }}. {{ ref.text }}</div>
                 <div class="info">
                     <div class="link">
-                        ‣ <a href="{{ data.pubs[loop.index0]['pub_url']}} " target="_blank">Link to Paper</a>
+                        ‣ <a href="{{ data.pubs[loop.index0]['pub_url'] }} " target="_blank">Link to Paper</a>
                     </div>
                     <div class="cite-num">
                         ‣ Number of Citations: <span>{{ data.pubs[loop.index0]['num_citations'] }}</span>
                     </div>
                     <div class="abstract">
-                        ‣ <a href="#" onclick="toggleAbstract('{{loop.index}}')">
+                        ‣ <a href="#abstract{{ loop.index }}" onclick="toggleAbstract('{{ loop.index }}')">
                             Abstract <span id="absToggle{{ loop.index }}">(show)</span>
                         </a>
+                        <div id="abstract{{ loop.index }}" class="text">{{ data.pubs[loop.index0]['bib']['abstract'] }}</div>
                     </div>
                 </div>
             </div>

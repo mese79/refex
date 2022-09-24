@@ -113,8 +113,8 @@ def query_scholars(refs: List[dict]):
         pub = next(query)  # get the first result
         # pub = scholarly.fill(pub)
         # pprint(scholarly.bibtex(pub))
-        with open('scholar_result.json', 'w') as f:
-            json.dump(pub, f)
+        # with open('scholar_result.json', 'w') as f:
+        #     json.dump(pub, f)
         pubs.append(pub)
 
     return pubs
