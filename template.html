@@ -11,7 +11,7 @@
 			font-family: serif;
 		}
 		.main {
-            width: 100%;
+            width: 85%;
 			margin: 15px;
 		}
 		.paper {
@@ -41,11 +41,35 @@
             font-size: 18px;
         }
         .refs .ref {
+            line-height: 22px;
             padding: 5px;
             margin-bottom: 15px;
         }
+        .ref .info {
+            position: relative;
+            left: 15px;
+            margin: 5px 0 0 0;
+            padding: 0 0 0 7px;
+            margin: 5px 0 0 0;
+        	/* border: 1px solid violet; */
+        }
 
 	</style>
+
+    <script type="text/javascript">
+        let absToggle = false;
+
+        function toggleAbstract(index) {
+            absToggle = !absToggle;
+            const span = document.getElementById("absToggle" + index);
+            console.log(absToggle, span);
+            if (absToggle === true) {
+                span.innerHTML = "(hide)";
+            } else {
+                span.innerHTML = "(show)";
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -66,11 +90,18 @@
             {% for ref in data.refs %}
             <div class="ref">
                 <div class="cite">{{ loop.index }}. {{ ref.text }}</div>
-                <div class="link">
-                    <a href="{{ data.pubs[loop.index0]['pub_url']}} " target="_blank">Link to Paper</a>
-                </div>
-                <div class="cite-num">
-                    Number of Citations: <span>{{ data.pubs[loop.index0]['num_citations'] }}</span>
+                <div class="info">
+                    <div class="link">
+                        ‣ <a href="{{ data.pubs[loop.index0]['pub_url']}} " target="_blank">Link to Paper</a>
+                    </div>
+                    <div class="cite-num">
+                        ‣ Number of Citations: <span>{{ data.pubs[loop.index0]['num_citations'] }}</span>
+                    </div>
+                    <div class="abstract">
+                        ‣ <a href="#" onclick="toggleAbstract('{{loop.index}}')">
+                            Abstract <span id="absToggle{{ loop.index }}">(show)</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}

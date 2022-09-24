@@ -48,7 +48,7 @@ def extract_refs(pdf_path: str):
         text = clean_text(text)
         print(f'\n\n{text[:500]}')
         cit_name, pattern = find_pattern(text[:500])
-        print(f'\n{cit_name}\n{pattern}')
+        print(f'\n{cit_name}\n{pattern}\n')
 
         if pattern is None:
             pass
@@ -57,9 +57,9 @@ def extract_refs(pdf_path: str):
             pprint(refs)
             print()
 
-            # pg = ProxyGenerator()
+            pg = ProxyGenerator()
             # print(pg.FreeProxies())
-            # scholarly.use_proxy(pg)
+            scholarly.use_proxy(pg, pg)
             pubs = query_scholars(refs)
             data = {
                 'title': pdf_info.title,
@@ -113,8 +113,8 @@ def query_scholars(refs: List[dict]):
         pub = next(query)  # get the first result
         # pub = scholarly.fill(pub)
         # pprint(scholarly.bibtex(pub))
-        #     with open('scholar_result.json', 'w') as f:
-        #         json.dump(pub, f)
+        with open('scholar_result.json', 'w') as f:
+            json.dump(pub, f)
         pubs.append(pub)
 
     return pubs
