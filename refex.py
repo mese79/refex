@@ -1,7 +1,8 @@
 import time
 import random
-import json
 import re
+import argparse
+from pathlib import Path
 from pprint import pprint
 from typing import Optional, Tuple, List
 
@@ -37,38 +38,43 @@ def extract_information(pdf_path: str) -> DocumentInformation:
     return information
 
 
-def extract_refs(pdf_path: str):
+def extract_refs(args: argparse.Namespace) -> None:
+    pdf_path = Path(args.pdf_file)
     # get given pdf info
     pdf_info = extract_information(pdf_path)
     # extract the references
     text = textract.process(pdf_path, encoding='utf-8').decode()
-    ref_index = text.find(REF_TITLE)
+    ref_index = text.find(args.ref_title)
     if ref_index > -1:
-        text = text[ref_index + len(REF_TITLE):]  # omit the 'Reference' word
+        text = text[ref_index + len(args.ref_title):]  # omit the 'Reference' word
         text = clean_text(text)
-        print(f'\n\n{text[:500]}')
-        cit_name, pattern = find_pattern(text[:500])
-        print(f'\n{cit_name}\n{pattern}\n')
+
+        # check for custom pattern
+        if args.pattern:
+            pattern = args.pattern
+        else:
+            cit_name, pattern = find_pattern(text[:500])
+            print(f'\n{cit_name}\n{pattern}\n')
 
         if pattern is None:
-            pass
+            raise ValueError('No pattern was found!')
         else:
             refs = get_refs_from_text(text, pattern)
             pprint(refs)
             print()
 
             pg = ProxyGenerator()
-            # print(pg.FreeProxies())
             scholarly.use_proxy(pg, pg)
-            pubs = query_scholars(refs)
+            pubs = query_scholars(refs, args.min_delay)
             data = {
                 'title': pdf_info.title,
                 'author': pdf_info.author,
-                'refs': refs[:3],
-                'pubs': pubs[:3]
+                'refs': refs[:5],
+                'pubs': pubs[:5]
             }
-            print(data)
-            save_html(data, HTML_TEMPLATE_FILE, 'output.html')
+            # save html output
+            output_file = pdf_path.parent.joinpath(args.output)
+            save_html(data, HTML_TEMPLATE_FILE, output_file)
 
 
 def clean_text(text: str) -> str:
@@ -94,7 +100,7 @@ def get_refs_from_text(text: str, pattern: str) -> List[dict]:
     refs = []
     for match in re.finditer(pattern, text):
         d = match.groupdict()
-        # add the matched text too
+        # add whole matched text too
         d.update({
             'text': clean_text(text[match.start(): match.end()])
         })
@@ -103,10 +109,10 @@ def get_refs_from_text(text: str, pattern: str) -> List[dict]:
     return refs
 
 
-def query_scholars(refs: List[dict]):
+def query_scholars(refs: List[dict], min_delay=3):
     pubs = []
-    for ref in refs[:3]:
-        time.sleep(5 + random.randint(0, 7))
+    for ref in refs[:5]:
+        time.sleep(min_delay + random.randint(0, 7))
         title = ref['title']
         print(f'querying "{title}" ...')
         query = scholarly.search_pubs(title)
@@ -132,7 +138,35 @@ def save_html(data: dict, template_file: str, out_file: str):
     return True
 
 
+def parse_cmd_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description='Extract References from a pdf file.'
+    )
+    parser.add_argument(
+        'pdf_file', type=str, help='PDF file to process'
+    )
+    parser.add_argument(
+        '--output', type=str, default='references.html', metavar='HTML',
+        help='output html file'
+    )
+    parser.add_argument(
+        '--min-delay', type=int, default=3, metavar='DELAY',
+        help='minimum delay (seconds) between google scholar requests'
+    )
+    parser.add_argument(
+        '--pattern', type=str,
+        help='custom regular expression pattern for matching citaions'
+    )
+    parser.add_argument(
+        '--ref-title', type=str, default=REF_TITLE, metavar='STR',
+        help='reference section title (default is "References\\n")'
+    )
+
+    return parser.parse_args()
+
+
 
 if __name__ == '__main__':
-    # extract_information('./pdf/molgan.pdf')
-    extract_refs('./pdf/molgan.pdf')
+    args = parse_cmd_args()
+    print(args)
+    extract_refs(args)
