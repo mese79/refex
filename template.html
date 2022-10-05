@@ -55,6 +55,15 @@
             padding: 0 0 0 7px;
             margin: 5px 0 0 0;
         }
+        .ref .info .link a{
+            color: dodgerblue;
+        }
+        .ref .info .abstract a{
+            color: deepskyblue;
+        }
+        .ref .info .cite-num {
+            color: dimgray;
+        }
         .abstract .text {
             display: none;
             width: 60%;
@@ -63,7 +72,7 @@
             text-justify: inter-word;
             margin: 0 0 0 10px;
             padding: 5px 12px;
-            border: 1px solid violet;
+            border: 1px solid deepskyblue;
         }
         .display {
             display: block !important;
@@ -106,16 +115,16 @@
             <h3>References:</h3>
             {% for ref in data.refs %}
             <div class="ref">
-                <div class="cite">{{ loop.index }}. {{ ref.text }}</div>
+                <div class="cite" id="cite{{loop.index}}">{{ loop.index }}. {{ ref.text }}</div>
                 <div class="info">
                     <div class="link">
-                        ‣ <a href="{{ data.pubs[loop.index0]['pub_url'] }} " target="_blank">Link to Paper</a>
+                        ‣ <a href="{{ data.pubs[loop.index0]['pub_url'] }} " target="_blank">{{ ref.title }}</a>
                     </div>
                     <div class="cite-num">
                         ‣ Number of Citations: <span>{{ data.pubs[loop.index0]['num_citations'] }}</span>
                     </div>
                     <div class="abstract">
-                        ‣ <a href="#abstract{{ loop.index }}" onclick="toggleAbstract('{{ loop.index }}')">
+                        ‣ <a href="#cite{{ loop.index }}" onclick="toggleAbstract('{{ loop.index }}')">
                             Abstract <span id="absToggle{{ loop.index }}">(show)</span>
                         </a>
                         <div id="abstract{{ loop.index }}" class="text">{{ data.pubs[loop.index0]['bib']['abstract'] }}</div>
